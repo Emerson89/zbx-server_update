@@ -14,21 +14,13 @@
     path: /tmp/zabbix-backup
     state: directory
     mode: '0755'
-  
-- name: Copy file zbx-server
-  ansible.builtin.copy:
-    src: /etc/zabbix/zabbix_server.conf
-    dest: /tmp/zabbix-backup
-  
-- name: Copy file zbx-http
-  ansible.builtin.copy:
-    src: /etc/httpd/conf.d/zabbix.conf
-    dest: /tmp/zabbix-backup
 
-#- name: Copy dir. zbx-share
-#  ansible.builtin.copy:
-#    src: /usr/share/zabbix/
-#    dest: /tmp/zabbix-backup
+- name: Copy files
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: '/etc/zabbix/zabbix_server.conf', dest: '/tmp/zabbix-backup' }
+    - { src: '/etc/httpd/conf.d/zabbix.conf', dest: '/tmp/zabbix-backup' }
+    - { src: '/usr/share/zabbix/', dest: '/tmp/zabbix-backup' }
 
 - name: Remove repository (and clean up left-over metadata)
   yum_repository:
