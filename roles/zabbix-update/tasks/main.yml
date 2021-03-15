@@ -1,13 +1,13 @@
 ---
 - name: Stop Zabbix Agent
-  service:
+  ansible.builtin.service:
     name: zabbix-agent
-    state: stop
+    state: stopped
 
 - name: Stop Zabbix Agent
   service:
     name: zabbix-server
-    state: stop
+    state: stopped
   
 - name: Criar diretorio Backup
   ansible.builtin.file:
@@ -25,36 +25,40 @@
     src: /etc/httpd/conf.d/zabbix.conf
     dest: /tmp/zabbix-backup
 
-- name: Copy dir. zbx-share
-  ansible.builtin.copy:
-    src: /usr/share/zabbix/
-    dest: /tmp/zabbix-backup
-  
-- name: Copy dir. zbx-share-doc
-  ansible.builtin.copy:
-    src: /usr/share/doc/zabbix-*
-    dest: /tmp/zabbix-backup
+#- name: Copy dir. zbx-share
+#  ansible.builtin.copy:
+#    src: /usr/share/zabbix/
+#    dest: /tmp/zabbix-backup
 
-- name: Instalando Zabbix Agent
-  shell: rpm -Uvh –force https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm
-     
-- name: Enabling repository front
-  shell: yum-config-manager --enable zabbix-frontend
-    
-- name: 
+- name: Remove repository (and clean up left-over metadata)
+  yum_repository:
+    name: zabbix-repo
+    state: absent
+  notify: yum-clean-metadata
+  
+- name: Install Zabbix Repo.
+  yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    file: "{{ item.file }}"
+    baseurl: "{{ item.baseurl }}"
+    enabled: "{{ item.enabled }}"
+    gpgcheck: "{{ item.gpgcheck }}"
+    gpgkey: "{{ item.gpgkey }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ zabbix_repo_yum }}"
+
+- name: Install Zabbix packages
   yum:
-    name: clean
-    state: present
-    
-- name: Realizado Upgrade Zabbix Server
-  yum: name={{ item }} state=latest
-  with_items:
+    name: "{{ packages }}"
+  vars:
+    packages:
     - zabbix-server-mysql
     - zabbix-web-mysql-scl
     - zabbix-nginx-conf-scl
     - zabbix-agent
-    - zabbix-get
- 
+    - zabbix-get 
+
 - name: Configure Zabbix Server Web
   template:
     src: zabbix.conf.j2
