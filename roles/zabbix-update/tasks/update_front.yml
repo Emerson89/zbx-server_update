@@ -1,0 +1,31 @@
+- name: Make sure php service is running
+  systemd:
+    name: rh-php72-php-fpm
+    state: started
+    enabled: yes
+
+- name: Copy php.zabbix.conf template 
+  template:
+    src: templates/zabbix-php.conf.j2
+    dest: /etc/opt/rh/rh-php72/php-fpm.d/zabbix.conf
+
+- name: Restart php
+  ansible.builtin.service:
+    name: rh-php72-php-fpm
+    state: restarted
+
+- name: Make sure nginx service is running
+  systemd:
+    name: rh-nginx116-nginx
+    state: started
+    enabled: yes
+
+- name: Copy web.zabbix.conf template 
+  template:
+    src: templates/zabbix_web.conf.j2
+    dest: /etc/opt/rh/rh-nginx116/nginx/conf.d/zabbix.conf
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: rh-nginx116-nginx
+    state: restarted

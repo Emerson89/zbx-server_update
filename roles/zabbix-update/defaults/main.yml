@@ -1,6 +1,6 @@
 ---
 zabbix_version: 5.0
-zabbix_hostname: "{{ ansible_hostname }}"
+zabbix_hostname: "{{ ansible_ssh_host }}"
 mysql_port: 3306
 zbx_server_address: 127.0.0.1
 zbx_frontend_address: 127.0.0.1

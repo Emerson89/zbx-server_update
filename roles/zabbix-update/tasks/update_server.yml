@@ -1,0 +1,109 @@
+---
+- name: Stop Zabbix Agent
+  ansible.builtin.service:
+    name: zabbix-agent
+    state: stopped
+
+- name: Stop Zabbix Agent
+  ansible.builtin.service:
+    name: zabbix-server
+    state: stopped
+
+- name: Stop httpd
+  ansible.builtin.service:
+    name: httpd
+    state: stopped
+  
+- name: Criar diretorio Backup
+  ansible.builtin.file:
+    path: /tmp/zabbix-backup
+    state: directory
+    mode: '0755'
+
+- name: Dump database zabbix
+  community.mysql.mysql_db:
+    state: dump
+    name: zabbix
+    target: /tmp/zabbix-backup/dump.sql
+
+- name: Copy files
+  copy: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: '/etc/zabbix/zabbix_server.conf', dest: '/tmp/zabbix-backup' }
+    - { src: '/etc/httpd/conf.d/zabbix.conf', dest: '/tmp/zabbix-backup' }
+    - { src: '/usr/share/zabbix/', dest: '/tmp/zabbix-backup' }
+
+- name: Remove repository (and clean up left-over metadata)
+  yum_repository:
+    name: zabbix-repo
+    state: absent
+  notify: yum-clean-metadata
+  
+- name: Install Zabbix Repo.
+  yum_repository:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    file: "{{ item.file }}"
+    baseurl: "{{ item.baseurl }}"
+    enabled: "{{ item.enabled }}"
+    gpgcheck: "{{ item.gpgcheck }}"
+    gpgkey: "{{ item.gpgkey }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ zabbix_repo_yum }}"
+
+- name: Install centos-release-scl
+  yum:
+    name: centos-release-scl
+    state: present
+
+- name: Install Zabbix packages
+  yum: 
+    name: "{{ item }}" 
+    state: latest
+    update_only: yes
+  with_items:
+    - zabbix-server-mysql
+    - zabbix-web-mysql-scl
+    - zabbix-nginx-conf-scl
+    - zabbix-agent
+    - zabbix-get 
+
+  #yum:
+  #  name: "{{ packages }}"
+  #  update_only: yes
+  #vars:
+  #  packages:
+    
+- name: Configure Zabbix Server Web
+  template:
+    src: zabbix.conf.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+    mode: '0644'
+  notify: restart zabbix-server  
+
+- name: Copy zabbix_server.conf template 
+  template:
+    src: templates/zabbix_server.conf.44.j2
+    dest: /etc/zabbix/zabbix_server.conf
+  notify: restart zabbix-server
+
+- name: Restart zabbix-server
+  ansible.builtin.service:
+    name: zabbix-server
+    state: restarted
+
+- name: Copy zabbix_agentd.conf template 
+  template:
+    src: templates/zabbix_agentd.conf.44.j2
+    dest: /etc/zabbix/zabbix_agentd.conf
+  notify: restart zabbix-agent
+
+- name: Restart php
+  ansible.builtin.service:
+    name: rh-php72-php-fpm
+    state: restarted
+ 
+- name: Restart nginx
+  ansible.builtin.service:
+    name: rh-nginx116-nginx
+    state: restarted
