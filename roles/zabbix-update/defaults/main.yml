@@ -8,7 +8,6 @@ zbx_database_address: 127.0.0.1
 zbx_database_saas: False
 zbx_database_name: zabbix
 zbx_database_user: zabbix
-zbx_database_password: ZabbixDB#2019!
 zabbix_repo: zabbix
 zabbix_repo_yum:
   - name: zabbix

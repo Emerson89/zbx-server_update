@@ -1,3 +1,11 @@
+- name: Update Zabbix-web-mysql packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - zabbix-web-mysql-scl
+    - zabbix-nginx-conf-scl
+
 - name: Make sure php service is running
   systemd:
     name: rh-php72-php-fpm

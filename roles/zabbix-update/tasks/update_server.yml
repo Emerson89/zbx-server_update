@@ -13,6 +13,7 @@
   ansible.builtin.service:
     name: httpd
     state: stopped
+  ignore_errors: True
   
 - name: Criar diretorio Backup
   ansible.builtin.file:
@@ -24,14 +25,19 @@
   community.mysql.mysql_db:
     state: dump
     name: zabbix
-    target: /tmp/zabbix-backup/dump.sql
+    target: /tmp/zabbix-backup/zabbix.sql
 
 - name: Copy files
-  copy: src={{ item.src }} dest={{ item.dest }}
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    backup: yes
   with_items:
     - { src: '/etc/zabbix/zabbix_server.conf', dest: '/tmp/zabbix-backup' }
+    - { src: '/etc/zabbix/zabbix_agentd.conf', dest: '/tmp/zabbix-backup' }
     - { src: '/etc/httpd/conf.d/zabbix.conf', dest: '/tmp/zabbix-backup' }
-    - { src: '/usr/share/zabbix/', dest: '/tmp/zabbix-backup' }
+    - { src: '/usr/share/zabbix', dest: '/tmp/zabbix-backup' }
+  ignore_errors: True
 
 - name: Remove repository (and clean up left-over metadata)
   yum_repository:
@@ -56,24 +62,24 @@
     name: centos-release-scl
     state: present
 
-- name: Install Zabbix packages
+- name: Remove versao web mysql 
+  yum:
+    name: "{{ item }}"
+    state: removed
+  with_items:
+    - "{{ zbx-mysql }}"
+    - "{{ zbx-web }}"
+
+- name: Update Zabbix packages
   yum: 
     name: "{{ item }}" 
     state: latest
     update_only: yes
   with_items:
     - zabbix-server-mysql
-    - zabbix-web-mysql-scl
-    - zabbix-nginx-conf-scl
     - zabbix-agent
-    - zabbix-get 
+    - zabbix-get
 
-  #yum:
-  #  name: "{{ packages }}"
-  #  update_only: yes
-  #vars:
-  #  packages:
-    
 - name: Configure Zabbix Server Web
   template:
     src: zabbix.conf.j2
@@ -97,13 +103,3 @@
     src: templates/zabbix_agentd.conf.44.j2
     dest: /etc/zabbix/zabbix_agentd.conf
   notify: restart zabbix-agent
-
-- name: Restart php
-  ansible.builtin.service:
-    name: rh-php72-php-fpm
-    state: restarted
- 
-- name: Restart nginx
-  ansible.builtin.service:
-    name: rh-nginx116-nginx
-    state: restarted
