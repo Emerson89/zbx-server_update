@@ -1,4 +1,4 @@
-## Update version zabbix-server using ansible 5.0
+## Update version zabbix-server using ansible for 5.0
 
 ![Badge](https://img.shields.io/badge/ansible-zabbix-red)
 
