@@ -1,36 +1,35 @@
-## Provision zabbix-agent using ansible
+## Update version zabbix-server using ansible 5.0
 
 ![Badge](https://img.shields.io/badge/ansible-zabbix-red)
 
 ## Dependencies
 ![Badge](https://img.shields.io/badge/ansible-2.9.10-blue)
 ![Badge](https://img.shields.io/badge/CentOS-7-blue)
+![Badge](https://img.shields.io/badge/mysql-5.7-blue)
 
-## This recipe accepts the following distros
-- Amazon
-- CentOS6
-- CentOS7
-- Debian7
-- Debian9
-- Ubuntu16
-- Ubuntu18
-- Ubuntu20
-
-## Edit the inventory file
+## Edit the inventory file insert your private or public ip
 
 ## Playbook example
 ```
 ---
-- name: Install Zabbix-agent
+- name: Update Zabbix-server
   hosts: all
   vars:
-    zabbix_server_ip: 'SERVER'
+    zbx_mysql: zabbix-web-mysql-4.4.10-1.el7.noarch
+    zbx_web: zabbix-web-4.4.10-1.el7.noarch
+    zbx_database_password: INSIRA-AQUI-SUA-SENHA-BANCO
+    zbx_archive_server: '/etc/zabbix/zabbix_server.conf'
+    zbx_archive_agent: '/etc/zabbix/zabbix_agentd.conf'
+    zbx_archive_httpd: '/etc/httpd/conf.d/zabbix.conf'
+    zbx_dir: '/usr/share/zabbix'
   become: yes
   roles:
-  - zabbix-agent
+  - zabbix-update
 ```
 ``` 
 ansible-playbook -i hosts playbook.yml
 ``` 
+## ATTENTION: If the version of zabbix-web, mysql is different from 4.4 and is not using apache modify in vars, the backup of the old zabbix will be stored in the directory /tmp/zabbix-backup
+
 ## License
 ![Badge](https://img.shields.io/badge/license-GPLv3-green)
