@@ -7,6 +7,33 @@
 ![Badge](https://img.shields.io/badge/CentOS-7-blue)
 ![Badge](https://img.shields.io/badge/mysql-5.7-blue)
 
+## Structure
+.
+├── ansible.cfg
+├── hosts
+├── playbook.yml
+├── README.md
+└── roles
+    └── zabbix-update
+        ├── defaults
+        │   └── main.yml
+        ├── handlers
+        │   └── main.yml
+        ├── meta
+        │   └── main.yml
+        ├── tasks
+        │   ├── front_update.yml
+        │   ├── main.yml
+        │   └── server_update.yml
+        └── templates
+            ├── zabbix_agentd.conf.44.j2
+            ├── zabbix.conf.j2
+            ├── zabbix-php.conf.j2
+            ├── zabbix_server.conf.44.j2
+            └── zabbix_web.conf.j2
+
+7 directories, 15 files
+
 ## Edit the inventory file insert your private or public ip
 
 ## Playbook example

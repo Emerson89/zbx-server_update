@@ -1,4 +1,4 @@
 - name: Update Zabbix Server
-  include: "update_server.yml"
+  include: "server_update.yml"
 - name: Update Frontend
-  include: "update_front.yml"
+  include: "front_update.yml"
