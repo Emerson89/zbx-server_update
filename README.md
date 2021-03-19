@@ -8,6 +8,7 @@
 ![Badge](https://img.shields.io/badge/mysql-5.7-blue)
 
 ## Structure
+```
 .
 ├── ansible.cfg
 ├── hosts
@@ -33,7 +34,7 @@
             └── zabbix_web.conf.j2
 
 7 directories, 15 files
-
+```
 ## Edit the inventory file insert your private or public ip
 
 ## Playbook example
