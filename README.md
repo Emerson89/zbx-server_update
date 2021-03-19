@@ -20,7 +20,6 @@
     zbx_database_password: INSIRA-AQUI-SUA-SENHA-BANCO
     zbx_archive_server: '/etc/zabbix/zabbix_server.conf'
     zbx_archive_agent: '/etc/zabbix/zabbix_agentd.conf'
-    zbx_archive_httpd: '/etc/httpd/conf.d/zabbix.conf'
     zbx_dir: '/usr/share/zabbix'
   become: yes
   roles:

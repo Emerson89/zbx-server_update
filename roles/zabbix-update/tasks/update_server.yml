@@ -25,9 +25,16 @@
   mysql_db:
     state: dump
     name: zabbix
-    target: /tmp/zabbix-backup/zabbix.sql
+    target: /tmp/zabbix.sql
 
-- name: Copy files
+- name: Copy dir. zabbix
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{ zbx_dir }}", dest: '/tmp/' }
+
+- name: Backup files
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -35,7 +42,7 @@
   with_items:
     - { src: "{{ zbx_archive_server }}", dest: '/tmp/zabbix-backup' }
     - { src: "{{ zbx_archive_agent }}", dest: '/tmp/zabbix-backup' }
-    - { src: "{{ zbx_dir }}", dest: '/tmp/zabbix-backup' }
+    - { src: /tmp/zabbix, dest: '/tmp/zabbix-backup' }
     - { src: "/tmp/zabbix.sql", dest: '/tmp/zabbix-backup' }
   ignore_errors: True
 
