@@ -35,8 +35,8 @@
   with_items:
     - { src: "{{ zbx_archive_server }}", dest: '/tmp/zabbix-backup' }
     - { src: "{{ zbx_archive_agent }}", dest: '/tmp/zabbix-backup' }
-    - { src: "{{ zbx_archive_httpd }}", dest: '/tmp/zabbix-backup' }
     - { src: "{{ zbx_dir }}", dest: '/tmp/zabbix-backup' }
+    - { src: "/tmp/zabbix.sql", dest: '/tmp/zabbix-backup' }
   ignore_errors: True
 
 - name: Remove repository (and clean up left-over metadata)
