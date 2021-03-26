@@ -2,12 +2,7 @@
 - name: Update Zabbix-server
   hosts: all
   vars:
-    zbx_mysql: zabbix-web-mysql-4.4.10-1.el7.noarch
-    zbx_web: zabbix-web-4.4.10-1.el7.noarch
     zbx_database_password: ZabbixDB#2020!
-    zbx_archive_server: '/etc/zabbix/zabbix_server.conf'
-    zbx_archive_agent: '/etc/zabbix/zabbix_agentd.conf'
-    zbx_dir: '/usr/share/zabbix'
   become: yes
   roles:
   - zabbix-update

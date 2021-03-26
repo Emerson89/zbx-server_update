@@ -43,12 +43,7 @@
 - name: Update Zabbix-server
   hosts: all
   vars:
-    zbx_mysql: zabbix-web-mysql-4.4.10-1.el7.noarch
-    zbx_web: zabbix-web-4.4.10-1.el7.noarch
     zbx_database_password: INSIRA-AQUI-SUA-SENHA-BANCO
-    zbx_archive_server: '/etc/zabbix/zabbix_server.conf'
-    zbx_archive_agent: '/etc/zabbix/zabbix_agentd.conf'
-    zbx_dir: '/usr/share/zabbix'
   become: yes
   roles:
   - zabbix-update
@@ -56,7 +51,29 @@
 ``` 
 ansible-playbook -i hosts playbook.yml
 ``` 
-## ATTENTION: If the version of zabbix-web, mysql is different from 4.4 and is not using apache modify in vars, the backup of the old zabbix will be stored in the directory /tmp/zabbix-backup
+## ATTENTION: 
+
+1- the backup of the old zabbix will be stored in the directory /tmp/zabbix-backup
+
+2 - Check the version of mysql for 5.6 you will need to update to one above this one was tested in version 5.7.33, tested in version 5.6 will present the error of type:
+```
+zabbix | 7:20200525:040444.998 starting automatic database upgrade
+zabbix | 7:20200525:040444.998 [Z3005] query failed: [1071] Specified key was too long; max key length is 3072 bytes [create index items_1 on items (hostid,key_(1021))]
+zabbix | 7:20200525:040444.998 database upgrade failed
+```
+3- To update the mysql version
+```
+rm -rf /etc/yum.repos.d/RepoMYSQL.repo - remove repo antigo 
+systemctl stop mysqld - pare o serviço
+yum install https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm - install repo
+yum update mysql-community-server -y - update version
+mysql --version - verifica version
+systemctl start mysqld - start service
+systemctl status zabbix-server - status do server 
+tail -f /var/log/zabbix/zabbix_server.log
+```
+
+IN PRODUCTION CAREFULLY EXECUTE ANY CHANGE IN THE BANK AND ALWAYS BACKUP
 
 ## License
 ![Badge](https://img.shields.io/badge/license-GPLv3-green)

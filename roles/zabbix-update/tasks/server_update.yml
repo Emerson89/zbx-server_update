@@ -27,23 +27,33 @@
     name: zabbix
     target: /tmp/zabbix.sql
 
-- name: Copy dir. zabbix
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+- name: Remove nginx php
+  yum:
+    name: "{{ item }}"
+    state: removed
   with_items:
-    - { src: "{{ zbx_dir }}", dest: '/tmp/' }
+    - nginx
+    - php-common
+  ignore_errors: True
 
-- name: Backup files
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    backup: yes
+- name: Criar diretorio Backup
+  ansible.builtin.file:
+    path: /tmp/zabbix-backup
+    state: directory
+    mode: '0755'
+
+- name: Dump database zabbix
+  mysql_db:
+    state: dump
+    name: zabbix
+    target: /tmp/zabbix.sql
+  ignore_errors: True
+
+- name: Copy files BKP
+  command: "{{item}}"
   with_items:
-    - { src: "{{ zbx_archive_server }}", dest: '/tmp/zabbix-backup' }
-    - { src: "{{ zbx_archive_agent }}", dest: '/tmp/zabbix-backup' }
-    - { src: /tmp/zabbix, dest: '/tmp/zabbix-backup' }
-    - { src: "/tmp/zabbix.sql", dest: '/tmp/zabbix-backup' }
+   - cp -R /etc/zabbix/ /tmp/zabbix-backup
+   - cp -R /usr/share/zabbix/ /tmp/zabbix-backup
   ignore_errors: True
 
 - name: Remove repository (and clean up left-over metadata)
@@ -66,16 +76,8 @@
 
 - name: Install centos-release-scl
   yum:
-    name: centos-release-scl
+    name: centos-release-scl-rh
     state: present
-
-- name: Remove versao web mysql 
-  yum:
-    name: "{{ item }}"
-    state: removed
-  with_items:
-    - "{{ zbx_mysql }}"
-    - "{{ zbx_web }}"
 
 - name: Update Zabbix packages
   yum: 
